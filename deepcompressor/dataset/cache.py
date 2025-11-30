@@ -24,6 +24,11 @@ from .action import CacheAction
 
 __all__ = ["BaseCalibCacheLoader"]
 
+ABORT_ON_HIGH_MEMORY_USAGE = False
+
+def _check_memory_usage():
+    if ABORT_ON_HIGH_MEMORY_USAGE and psutil.virtual_memory().percent > 90:
+        raise RuntimeError("memory usage > 90%%, aborting")
 
 class BaseCalibCacheLoader(ABC):
     """Base class for caching calibration dataset."""
@@ -329,8 +334,7 @@ class BaseCalibCacheLoader(ABC):
                         pass
                     tbar.update(self.batch_size)
                     tbar.set_postfix({"ram usage": psutil.virtual_memory().percent})
-                    if psutil.virtual_memory().percent > 90:
-                        raise RuntimeError("memory usage > 90%%, aborting")
+                    _check_memory_usage()
             for layer_cache in cache.values():
                 for module_cache in layer_cache.values():
                     module_cache.set_num_samples(num_samples)
@@ -378,8 +382,7 @@ class BaseCalibCacheLoader(ABC):
                             pass
                         tbar.update(self.batch_size)
                         tbar.set_postfix({"ram usage": psutil.virtual_memory().percent})
-                        if psutil.virtual_memory().percent > 90:
-                            raise RuntimeError("memory usage > 90%%, aborting")
+                        _check_memory_usage()
                         gc.collect()
                     tbar.close()
                 else:
@@ -400,8 +403,7 @@ class BaseCalibCacheLoader(ABC):
                         outputs = layer(*inputs.args, **inputs.kwargs)
                         layer_outputs.append(self._convert_layer_outputs(layer, outputs))
                         tbar.set_postfix({"ram usage": psutil.virtual_memory().percent})
-                        if psutil.virtual_memory().percent > 90:
-                            raise RuntimeError("memory usage > 90%%, aborting")
+                        _check_memory_usage()
                     prev_layer_outputs = layer_outputs
                     del inputs, outputs, layer_outputs
                     if (layer_idx == len(named_layers) - 1) or not use_prev_layer_outputs[layer_idx + 1]:
