@@ -176,3 +176,7 @@ wandb/
 
 # Scripts
 /scripts
+/baselines
+/configs
+/datasets
+/output
