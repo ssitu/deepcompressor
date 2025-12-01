@@ -2,6 +2,7 @@ import logging
 import os
 
 from deepcompressor.app.diffusion.dataset.data import get_dataset
+from deepcompressor.utils.tools.io import get_benchmark_paths
 
 from .fid import compute_fid
 from .image_reward import compute_image_reward
@@ -37,7 +38,11 @@ def compute_image_metrics(
     for benchmark in benchmarks:
         benchmark_results = {}
         dataset = get_dataset(benchmark, max_dataset_size=max_dataset_size, return_gt=True)
-        dirname = f"{dataset.config_name}-{dataset._unchunk_size}"
+        paths = get_benchmark_paths(
+            dataset, root=gen_root, benchmark=benchmark, max_dataset_size=max_dataset_size
+        )
+        dirname = paths.dirname
+        benchmark = paths.benchmark_type
         if dataset._chunk_start == 0 and dataset._chunk_step == 1:
             filename = f"{dirname}.npz"
         else:

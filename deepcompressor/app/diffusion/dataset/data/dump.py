@@ -4,6 +4,8 @@ import os
 import yaml
 from tqdm import tqdm
 
+from deepcompressor.utils import tools
+
 from ...utils import get_control
 from . import get_dataset
 
@@ -45,9 +47,11 @@ if __name__ == "__main__":
                         image.save(os.path.join(image_root, row["filename"] + ".png"))
                     else:
                         ext = os.path.basename(row["image_path"]).split(".")[-1]
-                        os.symlink(
+                        tools.io.handle_symlink(
                             os.path.abspath(os.path.expanduser(row["image_path"])),
-                            os.path.abspath(os.path.expanduser(os.path.join(image_root, row["filename"] + f".{ext}"))),
+                            os.path.abspath(
+                                os.path.expanduser(os.path.join(image_root, row["filename"] + f".{ext}"))
+                            ),
                         )
                     if "canny-to-image" in args.controls:
                         canny_root = os.path.join(benchmark_root, "canny_images")

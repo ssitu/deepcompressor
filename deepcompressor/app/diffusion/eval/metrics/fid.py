@@ -9,6 +9,8 @@ from cleanfid.resize import build_resizer
 from datasets import Dataset
 from tqdm import tqdm
 
+from deepcompressor.utils import tools
+
 __all__ = ["compute_fid"]
 
 
@@ -101,11 +103,11 @@ def compute_fid(
 
         if isinstance(ref_dirpath_or_dataset, str):
             sym_ref_dirpath = os.path.join(".tmp", f"ref-{hash(str(ref_dirpath_or_dataset))}-{timestamp}")
-            os.symlink(os.path.abspath(ref_dirpath_or_dataset), os.path.abspath(sym_ref_dirpath))
+            tools.io.handle_symlink(os.path.abspath(ref_dirpath_or_dataset), os.path.abspath(sym_ref_dirpath))
             ref_dirpath_or_dataset = sym_ref_dirpath
 
         sym_gen_dirpath = os.path.join(".tmp", f"gen-{hash(str(gen_dirpath))}-{timestamp}")
-        os.symlink(os.path.abspath(gen_dirpath), os.path.abspath(sym_gen_dirpath))
+        tools.io.handle_symlink(os.path.abspath(gen_dirpath), os.path.abspath(sym_gen_dirpath))
         gen_dirpath = sym_gen_dirpath
     mu1, sigma1 = get_fid_features(dataset_or_folder=ref_dirpath_or_dataset, cache_path=ref_cache_path)
     mu2, sigma2 = get_fid_features(dataset_or_folder=gen_dirpath, cache_path=gen_cache_path)

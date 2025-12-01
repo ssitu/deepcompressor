@@ -17,6 +17,7 @@ from tqdm import tqdm
 
 from deepcompressor.app.diffusion.dataset.data import get_dataset
 from deepcompressor.utils.common import hash_str_to_int
+from deepcompressor.utils.tools.io import get_benchmark_paths
 
 from ..utils import get_control
 from .metrics import compute_image_metrics
@@ -204,30 +205,11 @@ class DiffusionEvalConfig:
                 return_gt=task in ["canny-to-image"],
                 repeat=1,
             )
-            if benchmark.endswith(".yaml") or benchmark.endswith(".yml"):
-                dataset_name = os.path.splitext(os.path.basename(benchmark))[0]
-                dirpath = os.path.join(
-                    gen_root,
-                    "samples",
-                    "YAML",
-                    f"{dataset_name}-{dataset._unchunk_size}",
-                )
-            elif benchmark.endswith(".json"):
-                dataset_name = os.path.splitext(os.path.basename(benchmark))[0]
-                dirpath = os.path.join(
-                    gen_root,
-                    "samples",
-                    "JSON",
-                    f"{dataset_name}-{dataset._unchunk_size}",
-                )
-            else:
-                dataset_name = dataset.config_name
-                dirpath = os.path.join(
-                    gen_root,
-                    "samples",
-                    benchmark,
-                    f"{dataset.config_name}-{dataset._unchunk_size}",
-                )
+            benchmark_paths = get_benchmark_paths(
+                dataset, root=gen_root, benchmark=benchmark, max_dataset_size=dataset._unchunk_size
+            )
+            dirpath = benchmark_paths.dirpath
+            dataset_name = benchmark_paths.dataset_name
             if self.chunk_only:
                 dirpath += f".{dataset._chunk_start}.{dataset._chunk_step}"
             os.makedirs(dirpath, exist_ok=True)
